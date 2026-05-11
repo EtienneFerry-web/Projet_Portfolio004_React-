@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const products = [
   {
@@ -53,7 +54,7 @@ export default function FreshShipment() {
           <p className="shipment__desc">{product.description}</p>
 
           <div className="shipment__actions">
-            <button className="btn btn--dark">Buy now</button>
+            <Link to={`/product/${product.id}`} className="btn btn--dark">View details</Link>
             <button className="btn btn--outline">Add to cart</button>
           </div>
         </div>
