@@ -49,6 +49,26 @@
 .co__step--active { color: var(--dark); font-weight: 600; }
 .co__step--done { color: var(--green-dark); }
 
+.co__step-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-family: var(--font-body);
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.co__step-back-btn:hover {
+  color: var(--brown);
+}
+
 .co__step-num {
   width: 22px;
   height: 22px;

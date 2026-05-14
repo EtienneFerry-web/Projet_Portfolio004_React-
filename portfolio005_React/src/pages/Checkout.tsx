@@ -31,16 +31,29 @@ const STEP_LABELS: Record<Step, string> = {
   confirm: 'Confirmation',
 };
 
-function StepIndicator({ current }: { current: Step }) {
+function StepIndicator({ current, onGoTo }: { current: Step; onGoTo: (s: Step) => void }) {
   const idx = STEPS.indexOf(current);
   return (
     <ol className="co__steps">
-      {STEPS.map((s, i) => (
-        <li key={s} className={`co__step ${i === idx ? 'co__step--active' : ''} ${i < idx ? 'co__step--done' : ''}`}>
-          <span className="co__step-num">{i < idx ? '✓' : i + 1}</span>
-          <span className="co__step-label">{STEP_LABELS[s]}</span>
-        </li>
-      ))}
+      {STEPS.map((s, i) => {
+        const isDone = i < idx;
+        const isActive = i === idx;
+        return (
+          <li key={s} className={`co__step ${isActive ? 'co__step--active' : ''} ${isDone ? 'co__step--done' : ''}`}>
+            {isDone && s !== 'confirm' ? (
+              <button className="co__step-back-btn" onClick={() => onGoTo(s)} aria-label={`Go back to ${STEP_LABELS[s]}`}>
+                <span className="co__step-num">✓</span>
+                <span className="co__step-label">{STEP_LABELS[s]}</span>
+              </button>
+            ) : (
+              <>
+                <span className="co__step-num">{isDone ? '✓' : i + 1}</span>
+                <span className="co__step-label">{STEP_LABELS[s]}</span>
+              </>
+            )}
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -113,7 +126,7 @@ export default function Checkout() {
     <div className="co">
       <div className="co__header">
         <Link to="/" className="co__logo-link" aria-label="Home">Simply Furniture</Link>
-        <StepIndicator current={step} />
+        <StepIndicator current={step} onGoTo={(s) => setStep(s)} />
       </div>
 
       <div className="co__body">

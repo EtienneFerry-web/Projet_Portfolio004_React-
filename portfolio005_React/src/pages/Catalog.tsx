@@ -176,60 +176,82 @@ export default function Catalog() {
 
           {filtered.length === 0 ? (
             <div className="catalog__empty">
-              <p>No products match your filters.</p>
-              <button className="btn btn--outline" onClick={clearAll}>Clear filters</button>
+              {search ? (
+                <>
+                  <p className="catalog__empty-title">No results for "<strong>{search}</strong>"</p>
+                  <p className="catalog__empty-sub">Try a different search term or clear your filters.</p>
+                </>
+              ) : (
+                <>
+                  <p className="catalog__empty-title">No products match your filters</p>
+                  <p className="catalog__empty-sub">Try adjusting the price range or selecting a different category.</p>
+                </>
+              )}
+              <button className="btn btn--outline" onClick={clearAll}>Clear all filters</button>
             </div>
           ) : (
-            <div className="catalog__grid">
-              {filtered.map((product) => (
-                <Link key={product.id} to={`/product/${product.id}`} className="catalog__card">
-                  <div className="catalog__card-img">
-                    <img
-                      className="catalog__card-img-primary"
-                      src={product.images[0]}
-                      alt={product.name}
-                      loading="lazy"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&auto=format&fit=crop&q=60'; }}
-                    />
-                    {product.images[1] && (
+            <>
+              <div className="catalog__grid">
+                {filtered.slice(0, visibleCount).map((product) => (
+                  <Link key={product.id} to={`/product/${product.id}`} className="catalog__card">
+                    <div className="catalog__card-img">
                       <img
-                        className="catalog__card-img-hover"
-                        src={product.images[1]}
-                        alt={`${product.name} — alternate view`}
+                        className="catalog__card-img-primary"
+                        src={product.images[0]}
+                        alt={product.name}
                         loading="lazy"
-                        aria-hidden
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&auto=format&fit=crop&q=60'; }}
                       />
-                    )}
-                    {!product.inStock && <span className="catalog__badge catalog__badge--out">Out of stock</span>}
-                    <button
-                      className={`catalog__wish-btn ${has(product.id) ? 'catalog__wish-btn--active' : ''}`}
-                      onClick={(e) => { e.preventDefault(); toggle(product.id); }}
-                      aria-label={has(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                    >
-                      ♥
-                    </button>
-                  </div>
-                  <div className="catalog__card-info">
-                    <p className="catalog__card-category">{product.category}</p>
-                    <h3 className="catalog__card-name">{product.name}</h3>
-                    <StarRating rating={product.rating} />
-                    <div className="catalog__card-footer">
-                      <span className="catalog__card-price">€{product.price.toLocaleString()}</span>
-                      <div className="catalog__card-colors">
-                        {product.colors.slice(0, 3).map((c) => (
-                          <span
-                            key={c.value}
-                            className="catalog__card-color"
-                            style={{ backgroundColor: c.value }}
-                            title={c.label}
-                          />
-                        ))}
+                      {product.images[1] && (
+                        <img
+                          className="catalog__card-img-hover"
+                          src={product.images[1]}
+                          alt={`${product.name} — alternate view`}
+                          loading="lazy"
+                          aria-hidden
+                        />
+                      )}
+                      {!product.inStock && <span className="catalog__badge catalog__badge--out">Out of stock</span>}
+                      <button
+                        className={`catalog__wish-btn ${has(product.id) ? 'catalog__wish-btn--active' : ''}`}
+                        onClick={(e) => { e.preventDefault(); toggle(product.id); }}
+                        aria-label={has(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        ♥
+                      </button>
+                    </div>
+                    <div className="catalog__card-info">
+                      <p className="catalog__card-category">{product.category}</p>
+                      <h3 className="catalog__card-name">{product.name}</h3>
+                      <StarRating rating={product.rating} />
+                      <div className="catalog__card-footer">
+                        <span className="catalog__card-price">€{product.price.toLocaleString()}</span>
+                        <div className="catalog__card-colors">
+                          {product.colors.slice(0, 3).map((c) => (
+                            <span
+                              key={c.value}
+                              className="catalog__card-color"
+                              style={{ backgroundColor: c.value }}
+                              title={c.label}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+              {visibleCount < filtered.length && (
+                <div className="catalog__load-more">
+                  <button
+                    className="btn btn--outline catalog__load-btn"
+                    onClick={() => setVisibleCount((v) => v + 12)}
+                  >
+                    Load more ({filtered.length - visibleCount} remaining)
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

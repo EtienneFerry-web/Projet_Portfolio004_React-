@@ -367,9 +367,26 @@
   color: #888;
 }
 
-.catalog__empty p {
-  margin-bottom: 1.5rem;
-  font-size: 1.1rem;
+.catalog__empty-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.catalog__empty-sub {
+  font-size: 0.95rem;
+  color: #888;
+  margin-bottom: 1.75rem;
+}
+
+.catalog__load-more {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.catalog__load-btn {
+  min-width: 220px;
 }
 
 @media (max-width: 900px) {
