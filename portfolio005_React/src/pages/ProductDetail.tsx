@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { products } from '../data/products';
+import { useCart } from '../context/CartContext';
 import '../styles/ProductDetail.css';
 
-function StarRating({ rating }) {
+function StarRating({ rating }: { rating: number }) {
   return (
     <div className="pd__stars">
       {[1, 2, 3, 4, 5].map((s) => (
@@ -17,46 +18,73 @@ function StarRating({ rating }) {
 }
 
 export default function ProductDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addItem } = useCart();
   const product = products.find((p) => p.id === Number(id));
 
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [activeTab, setActiveTab] = useState('features');
+  const [activeTab, setActiveTab] = useState<'features' | 'dimensions' | 'materials'>('features');
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSent, setWaitlistSent] = useState(false);
+
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} — Simply Furniture`;
+    }
+    return () => { document.title = 'Simply Furniture'; };
+  }, [product]);
 
   if (!product) {
     return (
       <div className="pd__not-found">
         <h2>Product not found</h2>
-        <Link to="/" className="btn btn--dark">Back to home</Link>
+        <Link to="/catalog" className="btn btn--dark">Browse catalog</Link>
       </div>
     );
   }
 
-  const related = products.filter((p) => p.id !== product.id).slice(0, 2);
+  const related = products
+    .filter((p) => p.id !== product.id && p.category === product.category)
+    .concat(products.filter((p) => p.id !== product.id && p.category !== product.category))
+    .slice(0, 3);
 
   function handleAddToCart() {
+    for (let i = 0; i < qty; i++) {
+      addItem({
+        id: product!.id,
+        name: product!.name,
+        price: product!.price,
+        img: product!.images[0],
+        color: product!.colors[selectedColor].value,
+      });
+    }
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   }
 
+  function handleWaitlist(e: React.FormEvent) {
+    e.preventDefault();
+    setWaitlistSent(true);
+    setWaitlistEmail('');
+  }
+
   return (
     <div className="pd">
-      {/* Breadcrumb */}
       <nav className="pd__breadcrumb">
         <Link to="/">Home</Link>
+        <span>/</span>
+        <Link to="/catalog">Catalog</Link>
         <span>/</span>
         <span>{product.category}</span>
         <span>/</span>
         <span>{product.name}</span>
       </nav>
 
-      {/* Main layout */}
       <div className="pd__main">
-        {/* Gallery */}
         <div className="pd__gallery">
           <div className="pd__thumbs">
             {product.images.map((img, i) => (
@@ -66,18 +94,27 @@ export default function ProductDetail() {
                 onClick={() => setActiveImg(i)}
                 aria-label={`View image ${i + 1}`}
               >
-                <img src={img} alt={`${product.name} view ${i + 1}`} />
+                <img
+                  src={img}
+                  alt={`${product.name} view ${i + 1}`}
+                  loading="lazy"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                />
               </button>
             ))}
           </div>
           <div className="pd__img-main">
-            <img src={product.images[activeImg]} alt={product.name} />
+            <img
+              src={product.images[activeImg]}
+              alt={product.name}
+              loading="eager"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+            />
             {!product.inStock && <span className="pd__badge pd__badge--out">Out of stock</span>}
             {product.inStock && <span className="pd__badge pd__badge--new">New arrival</span>}
           </div>
         </div>
 
-        {/* Info */}
         <div className="pd__info">
           <p className="pd__category">{product.category}</p>
           <h1 className="pd__name">{product.name}</h1>
@@ -92,7 +129,6 @@ export default function ProductDetail() {
 
           <p className="pd__desc">{product.description}</p>
 
-          {/* Color picker */}
           <div className="pd__option-group">
             <p className="pd__option-label">
               Colour — <strong>{product.colors[selectedColor].label}</strong>
@@ -111,7 +147,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Quantity */}
           <div className="pd__option-group">
             <p className="pd__option-label">Quantity</p>
             <div className="pd__qty">
@@ -121,7 +156,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="pd__actions">
             <button
               className={`btn btn--dark pd__cta ${addedToCart ? 'pd__cta--added' : ''}`}
@@ -130,22 +164,38 @@ export default function ProductDetail() {
             >
               {addedToCart ? '✓ Added to cart' : 'Add to cart'}
             </button>
-            <button
-              className="btn btn--outline"
-              onClick={() => navigate(-1)}
-            >
+            <button className="btn btn--outline" onClick={() => navigate(-1)}>
               ← Back
             </button>
           </div>
 
           {!product.inStock && (
-            <p className="pd__stock-note">This item is currently out of stock. Join the waitlist.</p>
+            <div className="pd__waitlist">
+              {waitlistSent ? (
+                <p className="pd__waitlist-confirm">You're on the list! We'll notify you when it's back.</p>
+              ) : (
+                <form className="pd__waitlist-form" onSubmit={handleWaitlist}>
+                  <p className="pd__stock-note">Out of stock — join the waitlist to be notified.</p>
+                  <div className="pd__waitlist-row">
+                    <input
+                      type="email"
+                      required
+                      placeholder="your@email.com"
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      className="pd__waitlist-input"
+                      aria-label="Email for waitlist"
+                    />
+                    <button type="submit" className="btn btn--dark">Notify me</button>
+                  </div>
+                </form>
+              )}
+            </div>
           )}
 
-          {/* Tabs */}
           <div className="pd__tabs">
             <div className="pd__tab-nav">
-              {['features', 'dimensions', 'materials'].map((tab) => (
+              {(['features', 'dimensions', 'materials'] as const).map((tab) => (
                 <button
                   key={tab}
                   className={`pd__tab-btn ${activeTab === tab ? 'pd__tab-btn--active' : ''}`}
@@ -160,10 +210,7 @@ export default function ProductDetail() {
               {activeTab === 'features' && (
                 <ul className="pd__list">
                   {product.features.map((f) => (
-                    <li key={f}>
-                      <span className="pd__list-dot" />
-                      {f}
-                    </li>
+                    <li key={f}><span className="pd__list-dot" />{f}</li>
                   ))}
                 </ul>
               )}
@@ -182,10 +229,7 @@ export default function ProductDetail() {
               {activeTab === 'materials' && (
                 <ul className="pd__list">
                   {product.materials.map((m) => (
-                    <li key={m}>
-                      <span className="pd__list-dot" />
-                      {m}
-                    </li>
+                    <li key={m}><span className="pd__list-dot" />{m}</li>
                   ))}
                 </ul>
               )}
@@ -194,18 +238,22 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Related products */}
       <section className="pd__related">
         <h2 className="pd__related-title">You might also like</h2>
         <div className="pd__related-grid">
           {related.map((p) => (
             <Link key={p.id} to={`/product/${p.id}`} className="pd__related-card">
               <div className="pd__related-img">
-                <img src={p.images[0]} alt={p.name} />
+                <img
+                  src={p.images[0]}
+                  alt={p.name}
+                  loading="lazy"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                />
               </div>
               <div className="pd__related-info">
                 <p className="pd__related-name">{p.name}</p>
-                <p className="pd__related-price">${p.price}</p>
+                <p className="pd__related-price">${p.price.toLocaleString()}</p>
               </div>
             </Link>
           ))}

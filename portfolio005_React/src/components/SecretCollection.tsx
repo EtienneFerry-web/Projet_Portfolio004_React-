@@ -1,14 +1,19 @@
+import { Link } from 'react-router-dom';
+
 const pieces = [
   {
     name: 'Verta',
+    id: 5,
     img: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=300&auto=format&fit=crop&q=80',
   },
   {
     name: 'Cresta',
+    id: 4,
     img: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=300&auto=format&fit=crop&q=80',
   },
   {
-    name: 'Perra',
+    name: 'Koris',
+    id: 6,
     img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&auto=format&fit=crop&q=80',
   },
 ];
@@ -22,6 +27,8 @@ export default function SecretCollection() {
             <img
               src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&auto=format&fit=crop&q=80"
               alt="Secret collection lounge chair"
+              loading="lazy"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
             />
           </div>
         </div>
@@ -33,18 +40,23 @@ export default function SecretCollection() {
           <p className="secret__subtitle">Secret collection from Erick Law</p>
           <p className="secret__desc">
             A collaboration between Simply and Reykjavik-based designer Eric Lowe. 8 pieces
-            of furniture for relaxation, tranquility and comfort — available to order on our
-            website exclusively in February.
+            of furniture for relaxation, tranquility and comfort — available exclusively online,
+            while supplies last.
           </p>
 
           <div className="secret__pieces">
             {pieces.map((p) => (
-              <div className="secret__piece" key={p.name}>
+              <Link to={`/product/${p.id}`} className="secret__piece" key={p.name}>
                 <div className="secret__piece-img">
-                  <img src={p.img} alt={p.name} />
+                  <img
+                    src={p.img}
+                    alt={p.name}
+                    loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                  />
                 </div>
                 <span>{p.name}</span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

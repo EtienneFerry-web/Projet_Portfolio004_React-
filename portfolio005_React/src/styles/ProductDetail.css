@@ -221,6 +221,38 @@
   font-style: italic;
 }
 
+.pd__waitlist { margin-top: 4px; }
+
+.pd__waitlist-confirm {
+  font-size: 13px;
+  color: var(--green-dark);
+  font-weight: 500;
+  padding: 10px 14px;
+  background: rgba(78, 107, 82, 0.1);
+  border-radius: 8px;
+}
+
+.pd__waitlist-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.pd__waitlist-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-family: var(--font-body);
+  outline: none;
+  background: var(--white);
+  transition: border-color 0.2s;
+}
+.pd__waitlist-input:focus { border-color: var(--dark); }
+
 /* ─── TABS ────────────────────────────────────────────────────────────────── */
 .pd__tabs {
   border-top: 1px solid var(--cream-dark);
@@ -295,7 +327,7 @@
 
 .pd__related-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 
