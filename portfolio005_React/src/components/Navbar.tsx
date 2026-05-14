@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import CartDrawer from './CartDrawer';
+import Logo from './Logo';
 
 export default function Navbar() {
   const { totalCount } = useCart();
@@ -12,7 +13,7 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <Link to="/" className="navbar__logo" aria-label="Simply Furniture — Home">
-          <span>S</span>
+          <Logo className="navbar__logo-svg" />
         </Link>
 
         <ul className={`navbar__links ${menuOpen ? 'navbar__links--open' : ''}`}>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 
 const FEATURED_IDS = [1, 2];
 
@@ -10,6 +11,7 @@ export default function FreshShipment() {
   const [active, setActive] = useState(0);
   const product = featuredProducts[active];
   const { addItem } = useCart();
+  const { showToast } = useToast();
 
   function handleAddToCart() {
     addItem({
@@ -19,6 +21,7 @@ export default function FreshShipment() {
       img: product.images[0],
       color: product.colors[0].value,
     });
+    showToast(`${product.name} added to cart`);
   }
 
   return (

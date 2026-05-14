@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const slides = [
@@ -8,39 +8,41 @@ const slides = [
     subtitle: 'Modern Classic Silhouette',
     price: 349,
     img: 'https://images.unsplash.com/photo-1586158291800-2665f07bba79?w=700&auto=format&fit=crop&q=80',
+    thumb: 'https://images.unsplash.com/photo-1586158291800-2665f07bba79?w=200&auto=format&fit=crop&q=70',
     bg: '#C4703A',
   },
   {
     id: 2,
-    name: 'Verta Lounge',
-    subtitle: 'Soft & Contemporary',
-    price: 415,
+    name: 'Nova Chair',
+    subtitle: 'Contemporary Elegance',
+    price: 289,
     img: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=700&auto=format&fit=crop&q=80',
+    thumb: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=200&auto=format&fit=crop&q=70',
     bg: '#7A9A7E',
+  },
+  {
+    id: 3,
+    name: 'Velvet Throne',
+    subtitle: 'Luxury Statement Piece',
+    price: 495,
+    img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&auto=format&fit=crop&q=80',
+    thumb: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&auto=format&fit=crop&q=70',
+    bg: '#2D6A4F',
   },
 ];
 
-const thumbnails = [
-  {
-    name: 'Koris',
-    id: 6,
-    img: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=200&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Nova',
-    id: 2,
-    img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Verta',
-    id: 5,
-    img: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=200&auto=format&fit=crop&q=80',
-  },
-];
+const AUTOPLAY_MS = 5000;
 
 export default function Hero() {
   const [current, setCurrent] = useState(0);
   const slide = slides[current];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % slides.length);
+    }, AUTOPLAY_MS);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <section className="hero" style={{ '--hero-bg': slide.bg } as React.CSSProperties}>
@@ -50,11 +52,16 @@ export default function Hero() {
           <span className="hero__title--small">furniture</span>
         </h1>
         <p className="hero__tagline">Simple furniture<br />for soft life</p>
-        <Link to="/catalog" className="btn btn--light">Browse collection</Link>
+        <div className="hero__ctas">
+          <Link to="/catalog" className="btn btn--light">Browse collection</Link>
+          <Link to={`/product/${slide.id}`} className="hero__cta-secondary">
+            View {slide.name} — €{slide.price}
+          </Link>
+        </div>
       </div>
 
       <div className="hero__chair-wrap">
-        <Link to={`/product/${slide.id}`}>
+        <Link to={`/product/${slide.id}`} aria-label={`View ${slide.name}`}>
           <img
             className="hero__chair"
             src={slide.img}
@@ -65,12 +72,19 @@ export default function Hero() {
         </Link>
       </div>
 
+      {/* Thumbnails — synchronisées avec les slides, clic change le slide actif */}
       <div className="hero__thumbnails">
-        {thumbnails.map((t) => (
-          <Link to={`/product/${t.id}`} className="hero__thumb" key={t.name}>
-            <img src={t.img} alt={t.name} loading="lazy" />
-            <span>{t.name}</span>
-          </Link>
+        {slides.map((s, i) => (
+          <button
+            key={s.id}
+            className={`hero__thumb ${i === current ? 'hero__thumb--active' : ''}`}
+            onClick={() => setCurrent(i)}
+            aria-label={`Show ${s.name}`}
+            aria-pressed={i === current}
+          >
+            <img src={s.thumb} alt={s.name} loading="lazy" />
+            <span>{s.name}</span>
+          </button>
         ))}
       </div>
 
@@ -83,6 +97,11 @@ export default function Hero() {
             aria-label={`Slide ${i + 1}`}
           />
         ))}
+      </div>
+
+      {/* Barre de progression autoplay */}
+      <div className="hero__progress" key={current}>
+        <div className="hero__progress-bar" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
       </div>
     </section>
   );

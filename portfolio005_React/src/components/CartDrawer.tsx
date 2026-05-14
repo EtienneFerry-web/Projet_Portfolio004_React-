@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 interface Props {
@@ -7,6 +8,12 @@ interface Props {
 
 export default function CartDrawer({ open, onClose }: Props) {
   const { items, removeItem, updateQty, totalPrice, clearCart } = useCart();
+  const navigate = useNavigate();
+
+  function handleCheckout() {
+    onClose();
+    navigate('/checkout');
+  }
 
   return (
     <>
@@ -37,7 +44,7 @@ export default function CartDrawer({ open, onClose }: Props) {
                       <span>{item.qty}</span>
                       <button onClick={() => updateQty(item.id, item.color, item.qty + 1)} aria-label="Increase">+</button>
                     </div>
-                    <p className="cart-drawer__item-price">${(item.price * item.qty).toLocaleString()}</p>
+                    <p className="cart-drawer__item-price">€{(item.price * item.qty).toLocaleString()}</p>
                   </div>
                   <button
                     className="cart-drawer__item-remove"
@@ -49,8 +56,10 @@ export default function CartDrawer({ open, onClose }: Props) {
             </ul>
 
             <div className="cart-drawer__footer">
-              <p className="cart-drawer__total">Total — <strong>${totalPrice.toLocaleString()}</strong></p>
-              <button className="btn btn--dark cart-drawer__checkout">Checkout</button>
+              <p className="cart-drawer__total">Total — <strong>€{totalPrice.toLocaleString()}</strong></p>
+              <button className="btn btn--dark cart-drawer__checkout" onClick={handleCheckout}>
+                Checkout →
+              </button>
               <button className="cart-drawer__clear" onClick={clearCart}>Clear cart</button>
             </div>
           </>
